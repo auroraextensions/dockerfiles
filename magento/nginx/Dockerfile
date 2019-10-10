@@ -36,6 +36,8 @@ RUN set -x && \
         /etc/ssl/public \
         /etc/ssl/private
 
+COPY ./bin/entrypoint.sh /usr/sbin/entrypoint.sh
+
 COPY ./etc/nginx.conf /etc/nginx/nginx.conf
 COPY ./etc/default.conf /etc/nginx/conf.d/default.conf
 
