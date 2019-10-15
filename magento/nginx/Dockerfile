@@ -10,7 +10,8 @@ RUN set -x && \
             -d /var/www \
             -s /bin/bash \
             "${NAME}" && \
-    touch /var/run/nginx.pid
+    touch /var/run/nginx.pid && \
+    mkdir /sock
 
 RUN PACKAGES=" \
         openssl \
