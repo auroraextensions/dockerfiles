@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -x
+
+service cron start
+
+touch /var/www/html/var/.setup_cronjob_status \
+      /var/www/html/var/.update_cronjob_status 
+chown "${NAME}:${NAME}" /var/www/html/var/.setup_cronjob_status \
+                        /var/www/html/var/.update_cronjob_status
+
+/usr/bin/crontab
