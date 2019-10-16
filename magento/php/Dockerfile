@@ -134,8 +134,12 @@ COPY ./etc/php.ini /usr/local/etc/php/php.ini
 COPY ./etc/php-fpm.conf /usr/local/etc/php-fpm.conf
 
 RUN set x && \
-    mkdir /sock && \
+    mkdir /etc/nginx/html \
+          /var/www/html \
+          /sock && \
     chown -R "${NAME}:${NAME}" \
+        /etc/nginx \
+        /var/www \
         /usr/local/etc/php/conf.d \
         /sock
 
