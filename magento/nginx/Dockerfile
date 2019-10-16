@@ -43,7 +43,6 @@ COPY ./etc/nginx.conf /etc/nginx/nginx.conf
 COPY ./etc/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8443
-
 USER "${NAME}:${NAME}"
 
 VOLUME /var/www
