@@ -68,7 +68,8 @@ RUN EXT="sodium"; \
 
 RUN EXT="xdebug"; \
     set -x && \
-    pecl channel-update "${PECL_REPO}" && \
+    pecl channel-update \
+        "${PECL_REPO}" && \
     pecl install \
         $EXT && \
     docker-php-ext-enable \
@@ -111,12 +112,13 @@ RUN PKG="nodejs"; \
     curl -fsL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get install -y \
         $PKG && \
-    mkdir -p /var/www/.config /var/www/.npm && \
+    mkdir -p /var/www/.config \
+             /var/www/.npm && \
     chown "${NAME}:${NAME}" \
         /var/www/.config \
         /var/www/.npm && \
     ln -sf /var/www/html/node_modules/grunt/bin/grunt \
-        /usr/bin/grunt
+           /usr/bin/grunt
 
 RUN set -x && \
     curl -fsLO "${MAILHOG_LINK}" && \
@@ -124,15 +126,15 @@ RUN set -x && \
     mv -f "${MAILHOG_FILE}" /usr/local/bin/mhsendmail
 
 RUN set -x && \
-    printf '* *\t* * *\tapp\t%s/usr/local/bin/php /var/www/html/update/cron.php\n' >>/etc/crontab && \
-    printf '* *\t* * *\tapp\t%s/usr/local/bin/php /var/www/html/bin/magento cron:run\n' >>/etc/crontab && \
-    printf '* *\t* * *\tapp\t%s/usr/local/bin/php /var/www/html/bin/magento setup:cron:run\n#\n' >>/etc/crontab
+    printf '* * * * * %s /usr/local/bin/php /var/www/html/update/cron.php\n' "${NAME}" >>/etc/crontab && \
+    printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento cron:run\n' "${NAME}" >>/etc/crontab && \
+    printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento setup:cron:run\n#\n' "${NAME}" >>/etc/crontab
 
 COPY ./bin/croninit /usr/local/bin/croninit
 
-COPY ./etc/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY ./etc/php.ini /usr/local/etc/php/php.ini
 COPY ./etc/php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY ./etc/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN set x && \
     mkdir -p /etc/nginx/html \
