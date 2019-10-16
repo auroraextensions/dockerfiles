@@ -4,6 +4,7 @@ ENV NAME app
 ENV CUID 1000
 ENV MAILHOG_FILE mhsendmail_linux_amd64
 ENV MAILHOG_LINK "https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/${MAILHOG_FILE}"
+ENV PECL_REPO pecl.php.net
 
 RUN PACKAGES=" \
         cron \
@@ -25,8 +26,10 @@ RUN PACKAGES=" \
     apt-get install -y \
         $PACKAGES
 
-RUN set -x && \
-    docker-php-ext-configure gd \
+RUN PKG="gd"; \
+    set -x && \
+    docker-php-ext-configure \
+        $PKG \
         --with-freetype-dir=/usr/include/ \
         --with-jpeg-dir=/usr/include/
 
@@ -45,37 +48,44 @@ RUN EXTENSIONS=" \
     docker-php-ext-install \
         $EXTENSIONS
 
-RUN PACKAGE="mcrypt"; \
+RUN PKG="mcrypt"; \
     set -x && \
     pecl install \
-        "${PACKAGE}-1.0.2" && \
-    docker-php-ext-enable "${PACKAGE}"
+        "${PKG}-1.0.2" && \
+    docker-php-ext-enable \
+        "${PKG}"
 
-RUN set -x && \
-    echo "deb http://deb.debian.org/debian stretch-backports main" \
-        >>/etc/apt/sources.list
-
-RUN set -x && \
+RUN EXT="sodium"; \
+    LIB="lib${EXT}"; \
+    set -x && \
     apt-get update && \
     apt-get install -y \
-        libsodium-dev
+        "${LIB}-dev" && \
+    pecl install -f \
+        "${LIB}-1.0.17" && \
+    echo "extension=${EXT}.so" \
+        >/usr/local/etc/php/conf.d/${EXT}.ini
 
-RUN set -x && \
+RUN EXT="xdebug"; \
+    set -x && \
+    pecl channel-update "${PECL_REPO}" && \
     pecl install \
-        -f libsodium-1.0.17 && \
-    echo "extension=sodium.so" >/usr/local/etc/php/conf.d/sodium.ini
-
-RUN set -x && \
-    pecl channel-update pecl.php.net && \
-    pecl install xdebug && \
-    docker-php-ext-enable xdebug && \
+        $EXT && \
+    docker-php-ext-enable \
+        $EXT && \
     sed -i -e 's/^zend_extension/\;zend_extension/g' \
         /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
-RUN set -x && \
-    apt-get install -y libssh2-1-dev && \
-    pecl install ssh2-1.1.2 && \
-    docker-php-ext-enable ssh2
+RUN EXT="ssh2"; \
+    LIB="lib${EXT}"; \
+    PKG="${LIB}-1-dev"; \
+    set -x && \
+    apt-get install -y \
+        $PKG && \
+    pecl install \
+        "${EXT}-1.1.2" && \
+    docker-php-ext-enable \
+        $EXT
 
 RUN set -x && \
     curl -sS https://getcomposer.org/installer \
@@ -91,10 +101,16 @@ RUN set -x && \
         -s /bin/bash \
         "${NAME}"
 
-RUN set -x && \
-    apt-get install -y gnupg && \
+RUN PKG="gnupg"; \
+    set -x && \
+    apt-get install -y \
+        $PKG
+
+RUN PKG="nodejs"; \
+    set -x && \
     curl -fsL https://deb.nodesource.com/setup_8.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get install -y \
+        $PKG && \
     mkdir -p /var/www/.config /var/www/.npm && \
     chown "${NAME}:${NAME}" \
         /var/www/.config \
@@ -103,7 +119,7 @@ RUN set -x && \
         /usr/bin/grunt
 
 RUN set -x && \
-    curl -fsSLO "${MAILHOG_LINK}" && \
+    curl -fsLO "${MAILHOG_LINK}" && \
     chmod +x "${MAILHOG_FILE}" && \
     mv -f "${MAILHOG_FILE}" /usr/local/bin/mhsendmail
 
