@@ -43,9 +43,13 @@ RUN EXTENSIONS=" \
     "; \
     set -x && \
     docker-php-ext-install \
-        $EXTENSIONS && \
-    pecl install mcrypt-1.0.2 && \
-    docker-php-ext-enable mcrypt
+        $EXTENSIONS
+
+RUN PACKAGE="mcrypt"; \
+    set -x && \
+    pecl install \
+        "${PACKAGE}-1.0.2" && \
+    docker-php-ext-enable "${PACKAGE}"
 
 RUN set -x && \
     echo "deb http://deb.debian.org/debian stretch-backports main" \
