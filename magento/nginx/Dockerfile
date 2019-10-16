@@ -41,6 +41,7 @@ COPY ./bin/entrypoint.sh /usr/sbin/entrypoint.sh
 
 COPY ./etc/nginx.conf /etc/nginx/nginx.conf
 COPY ./etc/default.conf /etc/nginx/conf.d/default.conf
+COPY ./etc/magento.conf /etc/nginx/conf.d/magento.conf
 
 RUN set -x && \
     mkdir -p /etc/nginx/html \
