@@ -129,14 +129,15 @@ RUN set -x && \
     printf '* *\t* * *\tapp\t%s/usr/local/bin/php /var/www/html/bin/magento setup:cron:run\n#\n' >>/etc/crontab
 
 COPY ./bin/croninit /usr/local/bin/croninit
+
 COPY ./etc/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY ./etc/php.ini /usr/local/etc/php/php.ini
 COPY ./etc/php-fpm.conf /usr/local/etc/php-fpm.conf
 
 RUN set x && \
-    mkdir /etc/nginx/html \
-          /var/www/html \
-          /sock && \
+    mkdir -p /etc/nginx/html \
+             /var/www/html \
+             /sock && \
     chown -R "${NAME}:${NAME}" \
         /etc/nginx \
         /var/www \
