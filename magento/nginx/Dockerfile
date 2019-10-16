@@ -42,7 +42,17 @@ COPY ./bin/entrypoint.sh /usr/sbin/entrypoint.sh
 COPY ./etc/nginx.conf /etc/nginx/nginx.conf
 COPY ./etc/default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 8443
+RUN set -x && \
+    mkdir -p /etc/nginx/html \
+             /var/www/html && \
+    chown -R "${NAME}:${NAME}" \
+             /etc/nginx \
+             /var/www \
+             /var/cache/nginx \
+             /var/run/nginx.pid \
+             /sock
+
+EXPOSE 8080 8443
 USER "${NAME}:${NAME}"
 
 VOLUME /var/www
