@@ -2,9 +2,8 @@ FROM php:7.2-fpm
 
 ENV NAME app
 ENV CUID 1000
-ENV MAILHOG_FILE mhsendmail_linux_amd64
-ENV MAILHOG_LINK "https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/${MAILHOG_FILE}"
-ENV PECL_REPO pecl.php.net
+ENV PATH "${PATH}:/var/www/html/bin"
+ENV PECL pecl.php.net
 
 RUN PKGS=" \
         cron \
@@ -68,7 +67,7 @@ RUN EXT="sodium"; \
 RUN EXT="xdebug"; \
     set -x && \
     pecl channel-update \
-        "${PECL_REPO}" && \
+        "${PECL}" && \
     pecl install \
         "${EXT}" && \
     docker-php-ext-enable \
@@ -120,13 +119,17 @@ RUN PKG="nodejs"; \
     ln -sf /var/www/html/node_modules/grunt/bin/grunt \
            /usr/bin/grunt
 
-RUN set -x && \
-    curl -fsLO "${MAILHOG_LINK}" && \
-    chmod +x "${MAILHOG_FILE}" && \
-    mv -f "${MAILHOG_FILE}" \
-          /usr/local/bin/mhsendmail
+RUN FILE="mhsendmail"; \
+    EXEC="${FILE}_linux_amd64"; \
+    LINK="https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/${EXEC}"; \
+    set -x && \
+    curl -fsLO "${LINK}" && \
+    chmod +x "${EXEC}" && \
+    mv -f "${EXEC}" \
+          "/usr/local/bin/${FILE}"
 
 RUN set -x && \
+    echo "alias ll='ls -laF --color=auto'" >> "$HOME/.bashrc" && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/update/cron.php\n' "${NAME}" >>/etc/crontab && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento cron:run\n' "${NAME}" >>/etc/crontab && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento setup:cron:run\n#\n' "${NAME}" >>/etc/crontab
