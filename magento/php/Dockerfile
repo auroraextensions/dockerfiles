@@ -2,7 +2,7 @@ FROM php:7.2-fpm
 
 ENV NAME app
 ENV CUID 1000
-ENV PATH "${PATH}:/var/www/html/bin"
+ENV PATH "${PATH}:/var/www/html/bin:/var/www/html/vendor/bin"
 ENV PECL pecl.php.net
 
 RUN PKGS=" \
@@ -129,7 +129,7 @@ RUN FILE="mhsendmail"; \
           "/usr/local/bin/${FILE}"
 
 RUN set -x && \
-    echo "alias ll='ls -laF --color=auto'" >> "$HOME/.bashrc" && \
+    echo "alias ll='ls -laF --color=auto'" >> "/var/www/html/.bashrc" && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/update/cron.php\n' "${NAME}" >>/etc/crontab && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento cron:run\n' "${NAME}" >>/etc/crontab && \
     printf '* * * * * %s /usr/local/bin/php /var/www/html/bin/magento setup:cron:run\n#\n' "${NAME}" >>/etc/crontab
