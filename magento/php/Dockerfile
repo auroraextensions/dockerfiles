@@ -41,6 +41,7 @@ RUN EXTS=" \
         opcache \
         pdo_mysql \
         soap \
+        sockets \
         xsl \
         zip \
     "; \
